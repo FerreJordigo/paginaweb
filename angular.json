@@ -20,7 +20,11 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
-            "inlineFonts": false,
+            "optimization": {
+              "fonts": {
+                "inline": false
+              }
+            },
             "assets": [
               {
                 "glob": "**/*",
