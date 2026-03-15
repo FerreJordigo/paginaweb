@@ -1,0 +1,34 @@
+<div class="perfil-page">
+  <div class="perfil-head">
+    <div>
+      <h1 class="perfil-h1">Mi perfil</h1>
+      <p class="perfil-sub">Consulta tu información y tu código QR para marcaciones.</p>
+    </div>
+    <span class="badge" *ngIf="role">{{ role === 'admin' ? 'Administrador' : 'Empleado' }}</span>
+  </div>
+
+  <div class="alert" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="card" *ngIf="!cargando && !errorMsg">
+    <div class="row">
+      <div class="label">Nombre</div>
+      <div class="value">{{ nombre || '—' }}</div>
+    </div>
+    <div class="row">
+      <div class="label">Correo</div>
+      <div class="value">{{ email || '—' }}</div>
+    </div>
+    <div class="row">
+      <div class="label">UID</div>
+      <div class="value mono">{{ uid }}</div>
+    </div>
+
+    <div class="qr-wrap">
+      <div class="qr-title">Código QR</div>
+      <img class="qr" [src]="qrDataUrl" alt="QR" *ngIf="qrDataUrl" />
+      <div class="qr-hint">Muestra este QR para que te registren (entrada/salida/comida).</div>
+    </div>
+  </div>
+
+  <div class="loading" *ngIf="cargando">Cargando...</div>
+</div>

@@ -1,0 +1,152 @@
+<div class="asistencia-page">
+  <div class="asistencia-top">
+    <div>
+      <h1 class="as-h1">Asistencia</h1>
+      <p class="as-sub">
+        Escanea el QR del empleado para habilitar las marcaciones.
+        El orden es obligatorio: <b>Entrada → Inicio comida → Fin comida → Salida</b>.
+      </p>
+    </div>
+
+    <button class="btn-soft" type="button" (click)="openScan()" [disabled]="scannerOpen || scanning">
+      📷 Escanear QR
+    </button>
+  </div>
+
+  <div class="alert" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <section class="card">
+    <div class="grid">
+      <div class="field">
+        <label class="label">Fecha</label>
+        <input class="control" type="date" [(ngModel)]="fechaKey" (change)="onChangeFecha()" />
+      </div>
+
+      <div class="field">
+        <label class="label">Empleado</label>
+        <div class="control control-readonly">
+          {{ qrEmpleado?.nombre || 'Escanea un QR para seleccionar' }}
+        </div>
+        <div class="hint" *ngIf="qrEmpleado">UID: {{ qrEmpleado.uid }}</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" type="button" (click)="openMarcacionModal()" [disabled]="!qrEmpleado">
+        Registrar marcación
+      </button>
+      <button class="btn-danger" type="button" (click)="resetSeleccion()" [disabled]="!qrEmpleado">
+        Limpiar
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="cargando">Cargando…</div>
+  </section>
+
+  <section class="table-card">
+    <div class="table-head">
+      <div class="table-title">Registros del día</div>
+      <span class="badge">{{ registros.length }} registro(s)</span>
+    </div>
+
+    <div class="table-empty" *ngIf="!cargando && registros.length === 0">
+      No hay registros para esta fecha.
+    </div>
+
+    <div class="table-scroll" *ngIf="registros.length > 0">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Entrada</th>
+            <th>Inicio comida</th>
+            <th>Fin comida</th>
+            <th>Salida</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of registros">
+            <td class="td-emp">{{ r.empleadoNombre }}</td>
+            <td class="td-center">{{ formatHora(r.entradaLaboral) }}</td>
+            <td class="td-center">{{ formatHora(r.inicioComida) }}</td>
+            <td class="td-center">{{ formatHora(r.finComida) }}</td>
+            <td class="td-center">{{ formatHora(r.salidaLaboral) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- =======================
+     MODAL SCANNER QR
+     ======================= -->
+<div class="scan-back" *ngIf="scannerOpen" (click)="closeScan()">
+  <div class="scan-card" (click)="$event.stopPropagation()">
+    <div class="scan-head">
+      <div class="scan-title">Escanear QR</div>
+      <button class="scan-x" type="button" (click)="closeScan()">✕</button>
+    </div>
+
+    <div class="scan-body">
+      <video id="qrVideo" class="scan-video" autoplay playsinline></video>
+
+      <div class="scan-help">Apunta la cámara al QR. El QR contiene el UID del usuario.</div>
+
+      <div class="alert" *ngIf="scanError">{{ scanError }}</div>
+
+      <div class="scan-actions">
+        <button class="btn-soft" type="button" (click)="startScan()" [disabled]="scanning">Reintentar</button>
+        <button class="btn-danger" type="button" (click)="closeScan()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =======================
+     MODAL MARCACIÓN (POST-QR)
+     ======================= -->
+<div class="scan-back" *ngIf="marcacionModalOpen" (click)="closeMarcacionModal()">
+  <div class="scan-card" (click)="$event.stopPropagation()">
+    <div class="scan-head">
+      <div class="scan-title">Marcación</div>
+      <button class="scan-x" type="button" (click)="closeMarcacionModal()">✕</button>
+    </div>
+
+    <div class="scan-body">
+      <div class="emp-modal">
+        <div class="emp-modal-name">Empleado: <b>{{ qrEmpleado?.nombre }}</b></div>
+        <div class="emp-modal-sub">Fecha: {{ fechaKey }}</div>
+        <div class="emp-modal-sub" *ngIf="qrEmpleado">UID: {{ qrEmpleado.uid }}</div>
+      </div>
+
+      <div class="alert" *ngIf="marcacionError">{{ marcacionError }}</div>
+
+      <div class="actions" style="justify-content: flex-start; flex-wrap: wrap;">
+        <button class="btn-primary" type="button" (click)="marcar('entrada')" [disabled]="cargando || nextStep !== 'entrada'">
+          Entrada
+        </button>
+
+        <button class="btn-primary" type="button" (click)="marcar('inicio')" [disabled]="cargando || nextStep !== 'inicio'">
+          Inicio comida
+        </button>
+
+        <button class="btn-primary" type="button" (click)="marcar('fin')" [disabled]="cargando || nextStep !== 'fin'">
+          Fin comida
+        </button>
+
+        <button class="btn-primary" type="button" (click)="marcar('salida')" [disabled]="cargando || nextStep !== 'salida'">
+          Salida
+        </button>
+      </div>
+
+      <div class="hint" *ngIf="nextStep === 'done'">
+        ✅ Registro completo para este día.
+      </div>
+
+      <div class="scan-actions">
+        <button class="btn-soft" type="button" (click)="closeMarcacionModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<div class="shell">
+  <!-- SIDEBAR CLARO -->
+  <aside class="side">
+    <div class="side-top">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="/assets/logo.png" alt="Jordigo" />
+        </div>
+
+        <div class="brand-meta">
+          <div class="brand-name">JORDIGO</div>
+          <div class="brand-sub">FERRETERÍA</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">
+        <div class="section-title">GESTIÓN</div>
+
+        <a *ngIf="isAdmin" routerLink="/menu/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+          class="item">
+          <span class="ico"><i class="fas fa-home"></i></span>
+          <span class="txt">Dashboard</span>
+          <span class="chip" *ngIf="isAdmin">ADMIN</span>
+        </a>
+
+        <a routerLink="/menu/producto" routerLinkActive="active" class="item">
+          <span class="ico"><i class="fas fa-box-open"></i></span>
+          <span class="txt">Productos</span>
+        </a>
+
+        <a *ngIf="isAdmin" routerLink="/menu/empleado" routerLinkActive="active" class="item">
+          <span class="ico"><i class="fas fa-users"></i></span>
+          <span class="txt">Equipo</span>
+        </a>
+
+        <a *ngIf="isAdmin" routerLink="/menu/asistencia" routerLinkActive="active" class="item">
+          <span class="ico"><i class="fas fa-clock"></i></span>
+          <span class="txt">Asistencia</span>
+        </a>
+      </div>
+
+      <div class="nav-section">
+        <div class="section-title">CUENTA</div>
+
+        <a routerLink="/menu/perfil" routerLinkActive="active" class="item">
+          <span class="ico"><i class="fas fa-id-card"></i></span>
+          <span class="txt">Perfil</span>
+        </a>
+      </div>
+    </nav>
+
+    <div class="side-bottom">
+      <button type="button" (click)="abrirModalSalir()" class="logout">
+        <span class="ico"><i class="fas fa-sign-out-alt"></i></span>
+        <span class="txt">Cerrar sesión</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="main">
+    <div class="main-card">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL CERRAR SESIÓN -->
+<div class="logout-backdrop" *ngIf="showLogoutModal" (click)="cancelarSalir()"></div>
+
+<div class="logout-modal" *ngIf="showLogoutModal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+  <div class="logout-header">
+    <h3 class="logout-title">Cerrar sesión</h3>
+  </div>
+
+  <div class="logout-body">
+    <p>¿Estás seguro de que deseas salir de tu cuenta?</p>
+  </div>
+
+  <div class="logout-footer">
+    <button class="btn-cancel" (click)="cancelarSalir()" [disabled]="cerrando">
+      Cancelar
+    </button>
+    <button class="btn-exit" (click)="confirmarSalir()" [disabled]="cerrando">
+      {{ cerrando ? 'Saliendo...' : 'Sí, salir' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+<<<<<<< HEAD
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // ===== USERS (perfil + rol) =====
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      // admin puede crear perfiles de otros; usuario puede crear el suyo (si habilitas self-onboarding)
+      allow create: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ===== PRODUCTOS =====
+    match /producto/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== EMPLEADOS (listado/metadata) =====
+    match /empleado/{id} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ===== ASISTENCIA =====
+    // Este proyecto deja Asistencia como ADMIN ONLY (escaneo QR + marcación).
+    match /registroempleado/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ===== MOVIMIENTOS =====
+    match /movimientos/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.creadoPorUid == request.auth.uid);
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /movimiento/{id} {
+      allow read: if signedIn() && (isAdmin() || resource.data.creadoPorUid == request.auth.uid);
+      allow create: if signedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // ===== INVENTARIO DIARIO =====
+    match /inventarios_diarios/{fechaKey} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+
+      match /items/{productoId} {
+        allow read: if signedIn();
+        allow create, update, delete: if isAdmin();
+      }
+    }
+
+    // ===== TODO LO DEMÁS: BLOQUEADO =====
+=======
+    // Empleados: SOLO admin autenticado
+    match /empleado/{id} {
+      allow read: if true;                 // empleados deben ver lista para marcar
+      allow write: if request.auth != null; // solo admin crea/edita
+    }
+
+    // Registros: empleados escriben (sin auth) - riesgo controlado
+    match /registroempleado/{id} {
+      allow read: if request.auth != null; // solo admin ve reportes completos
+      allow create, update: if true;       // empleados marcan
+      allow delete: if request.auth != null;
+    }
+
+>>>>>>> 784f6b7a2d0a9aba4e2d9343825b5e77b702a4f0
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

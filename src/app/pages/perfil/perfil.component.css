@@ -1,0 +1,64 @@
+:host{ display:block; height:100%; }
+
+.perfil-page{
+  padding: 22px;
+  background:
+    radial-gradient(900px 460px at 18% 18%, rgba(250,168,93,0.22), transparent 60%),
+    radial-gradient(760px 420px at 82% 34%, rgba(254,200,154,0.35), transparent 62%),
+    linear-gradient(180deg, #F5F5DC 0%, #ffffff 60%, #ffffff 100%);
+}
+
+.perfil-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.perfil-h1{ margin:0; font-size: 28px; font-weight: 950; }
+.perfil-sub{ margin: 6px 0 0; font-size: 12px; font-weight: 800; color: rgba(17,24,39,0.62); }
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 950;
+  font-size: 12px;
+  border: 1px solid rgba(235,115,71,0.18);
+  background: rgba(255,255,255,0.75);
+  color: rgba(122,63,16,0.95);
+}
+
+.alert{
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.25);
+  color: #b91c1c;
+  font-weight: 900;
+}
+
+.card{
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(235,115,71,0.14);
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 18px 44px rgba(17,24,39,0.08);
+  padding: 14px;
+}
+
+.row{ display:flex; justify-content:space-between; gap: 10px; padding: 10px 2px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.row:last-child{ border-bottom:none; }
+.label{ font-weight: 950; color: rgba(122,63,16,0.95); }
+.value{ font-weight: 850; color: rgba(17,24,39,0.86); }
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+
+.qr-wrap{ margin-top: 14px; display:flex; flex-direction:column; align-items:center; gap: 10px; }
+.qr-title{ font-weight: 950; }
+.qr{ width: 240px; height: 240px; border-radius: 14px; border: 1px solid rgba(235,115,71,0.18); background: #fff; padding: 10px; }
+.qr-hint{ font-size: 12px; font-weight: 800; color: rgba(17,24,39,0.62); text-align:center; }
+
+.loading{ padding: 14px; text-align:center; font-weight: 900; color: rgba(17,24,39,0.60); }

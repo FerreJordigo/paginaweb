@@ -1,0 +1,203 @@
+<div class="emp-page">
+  <!-- Header -->
+  <div class="emp-top">
+    <div>
+      <h1 class="emp-h1">Empleados</h1>
+      <p class="emp-sub">Administra tu personal y consulta historial de asistencia</p>
+    </div>
+
+    <button class="btn-primary" type="button" (click)="openAddModal()" [disabled]="loading">
+      + Agregar empleado
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" type="button" [class.active]="tab==='empleados'" (click)="setTab('empleados')">
+      Empleados
+    </button>
+    <button class="tab" type="button" [class.active]="tab==='marcaciones'" (click)="setTab('marcaciones')">
+      Marcaciones
+    </button>
+  </div>
+
+  <!-- Error -->
+  <div class="alert" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+
+  <!-- =======================
+       TAB EMPLEADOS
+       ======================= -->
+  <section class="panel" *ngIf="tab==='empleados'">
+    <div class="panel-head">
+      <div class="panel-title">Administrar empleados</div>
+      <span class="badge">{{ empleados.length }} total</span>
+    </div>
+
+    <div class="list" *ngIf="empleados.length > 0; else emptyEmp">
+      <div class="row" *ngFor="let e of empleados">
+        <div class="left">
+          <span class="avatar">{{ initials(e.nombre) }}</span>
+          <div class="meta">
+            <div class="name">{{ e.nombre }}</div>
+            <div class="mini">
+              {{ e.role === 'admin' ? 'Admin' : 'Empleado' }}
+              <span *ngIf="e.email"> • {{ e.email }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-soft" type="button" (click)="openEditModal(e)" [disabled]="loading">Editar</button>
+          <button class="btn-danger" type="button" (click)="confirmDelete(e)" [disabled]="loading">Eliminar</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyEmp>
+      <div class="empty">
+        Aún no hay empleados. Usa “Agregar empleado”.
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- =======================
+       TAB MARCACIONES (HISTORIAL)
+       ======================= -->
+  <section class="hist-panel" *ngIf="tab==='marcaciones'">
+    <div class="hist-head">
+      <div>
+        <h2 class="hist-title">Historial de asistencia</h2>
+        <p class="hist-sub">Filtra por fecha y empleado para consultar registros.</p>
+      </div>
+
+      <div class="hist-badges">
+        <span class="badge badge-strong">Historial</span>
+        <span class="badge">{{ registrosFiltrados.length }} registro(s)</span>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-card">
+      <div class="filters-top">
+        <div class="filters-title">Filtros</div>
+        <span class="badge badge-soft">Solo lectura</span>
+      </div>
+
+      <div class="filters-grid">
+        <!-- Fecha -->
+        <div class="f-item">
+          <label class="f-label">Fecha</label>
+          <div class="date-wrap">
+            <input
+              class="f-control date-control"
+              type="date"
+              [(ngModel)]="fecha"
+              (change)="onFechaChange()"
+            />
+            <span class="date-ico" aria-hidden="true">📅</span>
+          </div>
+        </div>
+
+        <!-- Empleado -->
+        <div class="f-item">
+          <label class="f-label">Empleado</label>
+          <select class="f-control" [(ngModel)]="empleadoIdSeleccionado">
+            <option value="">Todos</option>
+            <option *ngFor="let e of empleados" [value]="e.id">{{ e.nombre }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-card">
+      <div class="table-head">
+        <div class="table-title">Registros del día</div>
+        <span class="badge">{{ registrosFiltrados.length }} registro(s)</span>
+      </div>
+
+      <div class="table-empty" *ngIf="!loading && registrosFiltrados.length === 0">
+        No hay registros para esta fecha.
+      </div>
+
+      <div class="table-scroll" *ngIf="registrosFiltrados.length > 0">
+        <table class="hist-table">
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Entrada</th>
+              <th>Salida</th>
+              <th>Inicio comida</th>
+              <th>Fin comida</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let r of registrosFiltrados">
+              <td class="emp-col">
+                <span class="emp-bubble">{{ initials(r.empleadoNombre) }}</span>
+                <div class="emp-info">
+                  <div class="emp-name">{{ r.empleadoNombre }}</div>
+                  <div class="emp-mini">Registro</div>
+                </div>
+              </td>
+
+              <td class="center"><span class="time-pill time-in">{{ formatHora(r.entradaLaboral) }}</span></td>
+              <td class="center"><span class="time-pill time-out">{{ formatHora(r.salidaLaboral) }}</span></td>
+              <td class="center"><span class="time-pill time-break">{{ formatHora(r.inicioComida) }}</span></td>
+              <td class="center"><span class="time-pill time-break">{{ formatHora(r.finComida) }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="loading" *ngIf="loading">Cargando...</div>
+    </div>
+  </section>
+
+  <!-- =======================
+       MODAL
+       ======================= -->
+  <div class="modal-back" *ngIf="modalOpen" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-title">
+          {{ modalMode === 'add' ? 'Nuevo empleado' : 'Editar empleado' }}
+        </div>
+        <button class="modal-x" type="button" (click)="closeModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="m-label">Nombre</label>
+        <input class="m-input" [(ngModel)]="modalNombre" placeholder="Ej: Juan Pérez" />
+
+        <ng-container *ngIf="modalMode === 'add'">
+          <label class="m-label" style="margin-top:12px;">Correo</label>
+          <input class="m-input" [(ngModel)]="modalEmail" placeholder="Ej: juan@empresa.com" />
+
+          <label class="m-label" style="margin-top:12px;">Contraseña temporal</label>
+          <input class="m-input" type="password" [(ngModel)]="modalPasswordTemp" placeholder="Mínimo 6 caracteres" />
+
+          <label class="m-label" style="margin-top:12px;">Rol</label>
+          <select class="m-input" [(ngModel)]="modalRole">
+            <option value="employee">Empleado</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <p style="margin:8px 2px 0; font-size:12px; font-weight:800; color: rgba(17,24,39,0.58);">
+            Se enviará correo para restablecer contraseña (recomendado).
+          </p>
+        </ng-container>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-soft" type="button" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" type="button" (click)="saveModal()" [disabled]="loading">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
