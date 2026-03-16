@@ -1,16 +1,29 @@
 <div class="page-wrap">
-  <div class="page-title">
-    <h1>GESTIÓN DE PRODUCTOS</h1>
-    <div class="title-line"></div>
+  <div class="toast-container" [class.show]="mostrarToast">
+    <div class="toast-content">
+      <span class="toast-icon">✓</span>
+      <span class="toast-msg">{{ mensajeToast }}</span>
+    </div>
   </div>
 
-  <div class="toolbar">
-    <button class="btn btn-accent-soft" (click)="abrirModalNuevo()">+ Nuevo producto</button>
+  <div class="page-header">
+    <div class="page-title">
+      <h1>GESTIÓN DE PRODUCTOS</h1>
+      <p class="page-subtitle">Administra el inventario de la ferretería</p>
+      <div class="title-line"></div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-accent-soft" (click)="cargarProductos()">🔄 Refrescar</button>
+      <button class="btn btn-primary" (click)="abrirModalNuevoProducto()" *ngIf="esAdmin">➕ Añadir Producto</button>
+    </div>
   </div>
 
   <div class="card-soft">
     <div class="card-soft-inner">
-      <h2 class="section-title">Inventario en Tiempo Real</h2>
+      <h2 class="section-title">
+        {{ esAdmin ? '⚡ Modo Administrador (Edición Habilitada)' : '👁️ Modo Empleado (Edición limitada)' }}
+      </h2>
 
       <form [formGroup]="tablaForm">
         <div class="table-responsive">
@@ -25,17 +38,17 @@
                 <th colspan="4">Bodega 2</th>
                 <th rowspan="2">Físico</th>
                 <th rowspan="2">Total</th>
-                <th rowspan="2" class="col-actions">Acciones</th>
+                <th rowspan="2" class="col-actions" *ngIf="esAdmin">Acciones</th>
               </tr>
               <tr class="thead-sub">
                 <th>Cobrados</th>
-                <th>Personal</th>
-                <th>Repartos</th>
-                <th>Entrada</th>
+                <th style="background-color: #e8f0fe;">Pers. 📝</th>
+                <th style="background-color: #e8f0fe;">Repar. 📝</th>
+                <th style="background-color: #e8f0fe;">Entr. 📝</th>
                 <th>Final</th>
                 <th>Exist.</th>
-                <th>Ent.</th>
-                <th>Sal.</th>
+                <th style="background-color: #e8f0fe;">Ent. 📝</th>
+                <th style="background-color: #e8f0fe;">Sal. 📝</th>
                 <th>Saldo</th>
               </tr>
             </thead>
@@ -48,28 +61,83 @@
                 
                 <td>
                   <input formControlName="nombre" class="excel-input cell-strong text-left" 
-                         (keydown)="moverAbajo($event, i, 'nombre')">
+                         [readonly]="!esAdmin" 
+                         [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                         placeholder="Nombre del producto">
                 </td>
                 
-                <td><input type="number" formControlName="b1InicialDia" class="excel-input" (keydown)="moverAbajo($event, i, 'b1InicialDia')"></td>
-                <td><input type="number" formControlName="b1CobradosNoEntregados" class="excel-input" (keydown)="moverAbajo($event, i, 'b1CobradosNoEntregados')"></td>
-                <td><input type="number" formControlName="b1SalidaPersonal" class="excel-input" (keydown)="moverAbajo($event, i, 'b1SalidaPersonal')"></td>
-                <td><input type="number" formControlName="b1SalidaRepartos" class="excel-input" (keydown)="moverAbajo($event, i, 'b1SalidaRepartos')"></td>
-                <td><input type="number" formControlName="b1EntradaBodega" class="excel-input" (keydown)="moverAbajo($event, i, 'b1EntradaBodega')"></td>
+                <td><input type="number" step="1" min="0" formControlName="b1InicialDia" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin" 
+                          [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                          (keydown)="moverAbajo($event, i, 'b1InicialDia')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b1CobradosNoEntregados" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin" 
+                          [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                          (keydown)="moverAbajo($event, i, 'b1CobradosNoEntregados')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b1SalidaPersonal" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin && !esCampoEditable('b1SalidaPersonal')" 
+                          [style.background]="!esAdmin && esCampoEditable('b1SalidaPersonal') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')"
+                          (keydown)="moverAbajo($event, i, 'b1SalidaPersonal')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b1SalidaRepartos" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin && !esCampoEditable('b1SalidaRepartos')" 
+                          [style.background]="!esAdmin && esCampoEditable('b1SalidaRepartos') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')"
+                          (keydown)="moverAbajo($event, i, 'b1SalidaRepartos')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b1EntradaBodega" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin && !esCampoEditable('b1EntradaBodega')" 
+                          [style.background]="!esAdmin && esCampoEditable('b1EntradaBodega') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')"
+                          (keydown)="moverAbajo($event, i, 'b1EntradaBodega')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
                 <td class="num cell-strong bg-calc">{{ getSaldoB1(i) }}</td>
 
-                <td><input type="number" formControlName="b2Existencia" class="excel-input" (keydown)="moverAbajo($event, i, 'b2Existencia')"></td>
-                <td><input type="number" formControlName="b2Entrada" class="excel-input" (keydown)="moverAbajo($event, i, 'b2Entrada')"></td>
-                <td><input type="number" formControlName="b2Salida" class="excel-input" (keydown)="moverAbajo($event, i, 'b2Salida')"></td>
+                <td><input type="number" step="1" min="0" formControlName="b2Existencia" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin" 
+                          [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                          (keydown)="moverAbajo($event, i, 'b2Existencia')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b2Entrada" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin && !esCampoEditable('b2Entrada')" 
+                          [style.background]="!esAdmin && esCampoEditable('b2Entrada') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')"
+                          (keydown)="moverAbajo($event, i, 'b2Entrada')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
+                <td><input type="number" step="1" min="0" formControlName="b2Salida" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin && !esCampoEditable('b2Salida')" 
+                          [style.background]="!esAdmin && esCampoEditable('b2Salida') ? '#fff3e0' : (!esAdmin ? '#f5f5f5' : 'transparent')"
+                          (keydown)="moverAbajo($event, i, 'b2Salida')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
+                
                 <td class="num cell-strong bg-calc">{{ getSaldoB2(i) }}</td>
 
-                <td><input type="number" formControlName="inventarioFisicoFerreteria" class="excel-input" (keydown)="moverAbajo($event, i, 'inventarioFisicoFerreteria')"></td>
+                <td><input type="number" step="1" min="0" formControlName="inventarioFisicoFerreteria" 
+                          class="excel-input" 
+                          [readonly]="!esAdmin" 
+                          [style.background]="!esAdmin ? '#f5f5f5' : 'transparent'"
+                          (keydown)="moverAbajo($event, i, 'inventarioFisicoFerreteria')" 
+                          onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"></td>
                 
-                <td class="num cell-strong" [style.color]="getSaldoTotal(i) <= 10 ? '#ef4444' : '#1f2a37'">
+                <td class="num cell-strong" [style.color]="getSaldoTotal(i) <= 10 ? '#ef4444' : 'var(--text)'">
                   {{ getSaldoTotal(i) }}
                 </td>
 
-                <td class="actions">
+                <td class="actions" *ngIf="esAdmin">
                   <button class="icon-btn delete" type="button" (click)="eliminarDesdeTabla(productos[i])">🗑</button>
                 </td>
               </tr>
@@ -77,26 +145,76 @@
           </table>
         </div>
       </form>
+
+      <!-- Botón de guardar para EMPLOYEE -->
+      <div class="toolbar" *ngIf="!esAdmin" style="justify-content: center; margin-top: 20px; margin-bottom: 10px;">
+        <button class="btn btn-primary" (click)="guardarCambiosEmployee()" style="padding: 12px 40px; font-size: 16px;">
+          💾 GUARDAR CAMBIOS
+        </button>
+      </div>
+
+      <!-- Leyenda para employee -->
+      <div *ngIf="!esAdmin" style="padding: 10px 14px; background: #fff3e0; border-radius: 8px; margin: 10px 14px; font-size: 13px;">
+        <strong>📝 Campos que puedes editar:</strong> Pers., Repar., Entr. (B1), Ent. B2, Sal. B2
+      </div>
     </div>
   </div>
 </div>
 
-<div class="modal-backdrop-soft" *ngIf="modalOpen" (click)="cerrarModal()"></div>
-<div class="modal-soft" *ngIf="modalOpen">
-  <div class="modal-soft-header">
-    <button class="back-btn" (click)="cerrarModal()">‹</button>
-    <div class="modal-title">{{ modalTitle }}</div>
-    <div class="header-dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
-  </div>
-  <div class="modal-soft-body">
-    <div class="field"><label>Nombre</label><input class="field-input" [(ngModel)]="producto.nombre"></div>
-    <div class="grid-2">
-      <div class="field"><label>Categoría</label><input class="field-input" [(ngModel)]="producto.categoria"></div>
-      <div class="field"><label>Unidad</label><input class="field-input" [(ngModel)]="producto.unidad"></div>
+<!-- Modal para nuevo producto (solo admin) - VERSIÓN SIMPLIFICADA -->
+<div class="modal-back" *ngIf="modalAbierto" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">➕ Nuevo Producto</div>
+      <button class="modal-x" type="button" (click)="cerrarModal()">✕</button>
     </div>
-  </div>
-  <div class="modal-soft-footer">
-    <button class="btn-link" (click)="cerrarModal()">Cancelar</button>
-    <button class="btn btn-accent-solid" (click)="guardarDesdeModal()">Crear Producto</button>
+
+    <div class="modal-body">
+      <!-- Campo OBLIGATORIO: Nombre -->
+      <label class="modal-label">Nombre del producto <span style="color: #ef4444;">*</span></label>
+      <input class="modal-input" [(ngModel)]="nuevoProducto.nombre" 
+             placeholder="Ej: Martillo 16oz" 
+             required
+             style="border-left: 3px solid #f2a35b;">
+
+      <!-- Campo OBLIGATORIO: Cantidad inicial -->
+      <label class="modal-label" style="margin-top:15px;">Cantidad inicial <span style="color: #ef4444;">*</span></label>
+      <input class="modal-input" type="number" step="1" min="0" 
+             [(ngModel)]="nuevoProducto.cantidad" 
+             placeholder="0" 
+             onkeypress="return (event.charCode >= 48 && event.charCode <= 57)"
+             style="border-left: 3px solid #f2a35b;">
+
+      <!-- Campo OPCIONAL: Categoría -->
+      <label class="modal-label" style="margin-top:15px;">Categoría <span style="color: #6b7280; font-size: 11px;">(opcional)</span></label>
+      <select class="modal-input" [(ngModel)]="nuevoProducto.categoria">
+        <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+      </select>
+
+      <!-- Campo OPCIONAL: Precio -->
+      <label class="modal-label" style="margin-top:15px;">Precio <span style="color: #6b7280; font-size: 11px;">(opcional)</span></label>
+      <input class="modal-input" type="number" step="1" min="0" 
+             [(ngModel)]="nuevoProducto.precio" 
+             placeholder="0" 
+             onkeypress="return (event.charCode >= 48 && event.charCode <= 57)">
+
+      <!-- Campo OPCIONAL: Proveedor -->
+      <label class="modal-label" style="margin-top:15px;">Proveedor <span style="color: #6b7280; font-size: 11px;">(opcional)</span></label>
+      <input class="modal-input" [(ngModel)]="nuevoProducto.proveedor" 
+             placeholder="Ej: Proveedor S.A.">
+
+      <!-- Mensaje informativo -->
+      <div style="margin-top: 20px; padding: 10px; background: #f3f4f6; border-radius: 8px; font-size: 12px; color: #4b5563;">
+        <strong>📌 Nota:</strong> Los campos marcados con <span style="color: #ef4444;">*</span> son obligatorios.
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-accent-soft" type="button" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" type="button" (click)="guardarNuevoProducto()" 
+              [disabled]="!nuevoProducto.nombre || nuevoProducto.cantidad === undefined">
+        Guardar Producto
+      </button>
+    </div>
   </div>
 </div>
